@@ -3287,7 +3287,10 @@ public class BluetoothLePlugin extends CordovaPlugin {
     return descriptor;
   }
 
-  //Helpers for Callbacks
+  /**
+	 * 큐를 추가한다.
+	 * @param operation 작업 내용
+	 */
   private void queueAdd(Operation operation) {
     JSONArray args = operation.args;
     CallbackContext callbackContext = operation.callbackContext;
@@ -3304,11 +3307,27 @@ public class BluetoothLePlugin extends CordovaPlugin {
 
     HashMap<Object, Object> connection = connections.get(address);
 
+    // 커넥션이 Null 이 아닌경우 
     if (connection != null) {
-      LinkedList<Operation> queue = (LinkedList<Operation>) connection.get(keyQueue);
-      queue.add(operation);
-      queueStart(connection);
-    }
+      
+      // 커넥션으로부 터 Queue 를 가져온다 
+			LinkedList<Operation> queue = (LinkedList<Operation>) connection.get(keyQueue);
+
+      // Queue 가 Null 일경우 ( 예외 )
+			if(queue == null) {
+        // Dummy 로 Queue 를 생성한다.
+				queue = new LinkedList<>();
+
+        // 커넥션에 Queue 를 더미로 추가한다.
+				connection.put(keyQueue, queue);
+			}
+
+      // 작업을 Queue 에 추가한다.
+			queue.add(operation);
+
+      // 작업을 시작한다.
+			queueStart(connection);
+		}
   }
 
   private void queueStart(HashMap<Object, Object> connection) {
